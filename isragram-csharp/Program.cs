@@ -1,5 +1,7 @@
+using DevagramCSharp.Models;
 using isragram_csharp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -10,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<IsragramContext>(option => option.UseSqlServer(connectionString));
 
 var cryptographyKey = Encoding.ASCII.GetBytes(JWTKey.SecretKey);
 builder.Services.AddAuthentication(auth =>
