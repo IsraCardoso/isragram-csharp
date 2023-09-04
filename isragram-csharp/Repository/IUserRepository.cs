@@ -1,0 +1,11 @@
+﻿using isragram_csharp.Models;
+
+namespace isragram_csharp.Repository
+{
+    public interface IUserRepository
+    {
+        public void Save (User user);
+        public bool UsernameExists (string username);
+        public bool EmailExists(string email);
+    }
+}

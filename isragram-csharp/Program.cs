@@ -1,5 +1,7 @@
 using DevagramCSharp.Models;
 using isragram_csharp;
+using isragram_csharp.Repository;
+using isragram_csharp.Repository.Impl;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,10 +14,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-
+//config for DB entity
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<IsragramContext>(option => option.UseSqlServer(connectionString));
+// escopo para inicialização do repositório de usuários
+builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>(); //why exactly??
 
+//config for JWT bearer token 
 var cryptographyKey = Encoding.ASCII.GetBytes(JWTKey.SecretKey);
 builder.Services.AddAuthentication(auth =>
 {
