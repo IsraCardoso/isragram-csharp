@@ -5,7 +5,7 @@ namespace isragram_csharp.Repository.Impl
 {
     public class UserRepositoryImpl : IUserRepository
     {
-        private readonly IsragramContext _context; //
+        private readonly IsragramContext _context;
 
         public UserRepositoryImpl(IsragramContext context)
         {
@@ -26,6 +26,14 @@ namespace isragram_csharp.Repository.Impl
             return _context.Users.Any(u => u.Email == email);
         }
 
+        public User Login(string email, string password)
+        {
+            return _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+        }
 
+        public User GetUserById (int id)
+        {
+            return _context.Users.FirstOrDefault(u => u.Id == id);
+        }
     }
 }

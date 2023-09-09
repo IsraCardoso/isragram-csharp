@@ -2,6 +2,7 @@
 using isragram_csharp.Models;
 using isragram_csharp.Repository;
 using isragram_csharp.Repository.Impl;
+using isragram_csharp.Services;
 using isragram_csharp.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +14,10 @@ namespace isragram_csharp.Controllers
     public class UserController : ControllerBaseWithAuth
     {
         public readonly ILogger<UserController> _logger;
-        public readonly IUserRepository _userRepository;
 
-        public UserController(ILogger<UserController> logger, IUserRepository userRepository)
+        public UserController(ILogger<UserController> logger, IUserRepository userRepository):base(userRepository)
         {
             _logger = logger;
-            _userRepository = userRepository;
         }
 
         [HttpGet]
@@ -26,8 +25,9 @@ namespace isragram_csharp.Controllers
         {
             try
             {
-                User user = new User(id: 20, email: "teste@teste.com", username: "teste");
-                return Ok(user);
+                User currentUser = ReadToken();
+
+                return Ok(new UserResponseDto { Email= currentUser.Email, Username= currentUser.Username});
             }
             catch (Exception ex) 
             {
@@ -44,24 +44,24 @@ namespace isragram_csharp.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult saveUser([FromBody] User userToSave)
+        public IActionResult saveUser([FromForm] UserRequestDto userReq)
         {
             try
             {
                 var errorList = new List<string>();
                     
-                if (userToSave != null )
+                if (userReq != null )
                 {               
 
-                    if ( String.IsNullOrEmpty(userToSave.Username) || String.IsNullOrWhiteSpace(userToSave.Username)) 
+                    if ( String.IsNullOrEmpty(userReq.Username) || String.IsNullOrWhiteSpace(userReq.Username)) 
                     {
                         errorList.Add("O nome de usuário digitado é inválido");
                     }
-                    if (String.IsNullOrEmpty(userToSave.Email) || String.IsNullOrWhiteSpace(userToSave.Email) || !userToSave.Email.Contains("@"))
+                    if (String.IsNullOrEmpty(userReq.Email) || String.IsNullOrWhiteSpace(userReq.Email) || !userReq.Email.Contains("@"))
                     {
                         errorList.Add("Email digitado não é válido");
                     }
-                    if (String.IsNullOrEmpty(userToSave.Password) || String.IsNullOrWhiteSpace(userToSave.Password))
+                    if (String.IsNullOrEmpty(userReq.Password) || String.IsNullOrWhiteSpace(userReq.Password))
                     {
                         errorList.Add("A senha digitada não é válida");
                     }
@@ -73,30 +73,44 @@ namespace isragram_csharp.Controllers
                             errors : errorList)
                         );
                     }
-                    userToSave.Username = userToSave.Username.ToLower();
-                    userToSave.Email = userToSave.Email.ToLower();
-                    userToSave.Password = MD5Utils.GenerateMD5Hash(userToSave.Password);
 
-                    if (_userRepository.UsernameExists(userToSave.Username))
+                    userReq.Username = userReq.Username.ToLower();
+                    userReq.Email = userReq.Email.ToLower();
+
+                    if (_userRepository.UsernameExists(userReq.Username))
                     {
                         return BadRequest(new ErrorResponseDto(
                                                         status: StatusCodes.Status400BadRequest,
                             description: "O nome de usuário informado já existe! Favor escolher outro nome"
                             )
-);
+                        );
                     }
-                    if (_userRepository.EmailExists(userToSave.Email))
+
+                    if (_userRepository.EmailExists(userReq.Email))
                     {
                         return BadRequest(new ErrorResponseDto(
                                                         status: StatusCodes.Status400BadRequest,
                             description: "O email informado já está cadastrado! "
                             )
-);
+                        );
                     }
+
+
+                    userReq.Password = MD5Utils.GenerateMD5Hash(userReq.Password);
+
+                    CosmicService cosmicService = new CosmicService();
+
+                    User userToSave = new User {
+                    Username = userReq.Username,
+                    Email= userReq.Email,
+                    Password= userReq.Password,
+                    Avatar = cosmicService.SendImage(new ImageDto { Image= userReq.Avatar, Name= userReq.Username.Replace(" ","") })
+                    };
+
                     _userRepository.Save(userToSave);
                 }
-            
-            return Ok(userToSave);
+
+            return Ok("Usuário criado com sucesso!");
 
             }
             catch (Exception ex)

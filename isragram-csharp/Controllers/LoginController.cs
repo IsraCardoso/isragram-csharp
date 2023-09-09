@@ -1,6 +1,8 @@
 ﻿using DevagramCSharp.Services;
 using isragram_csharp.Dtos;
 using isragram_csharp.Models;
+using isragram_csharp.Repository;
+using isragram_csharp.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -12,9 +14,11 @@ namespace isragram_csharp.Controllers
     public class LoginController :ControllerBase
     {
         private readonly ILogger<LoginController> _logger;
-        public LoginController(ILogger<LoginController> logger)
+        private readonly IUserRepository _userRepository;
+        public LoginController(ILogger<LoginController> logger, IUserRepository userRepository)
         {
             _logger = logger;
+            _userRepository = userRepository;
         }
 
         [HttpPost]
@@ -26,21 +30,23 @@ namespace isragram_csharp.Controllers
                 if (!String.IsNullOrEmpty(loginRequest.Email) && !String.IsNullOrEmpty(loginRequest.Password) && 
                     !String.IsNullOrWhiteSpace(loginRequest.Email) && !String.IsNullOrWhiteSpace(loginRequest.Password))
                 {
-                    string email = "teste";
-                    string password = "1234";
-
-                    if (loginRequest.Email == email && loginRequest.Password == password) {
-                        User userResponse = new User(id:15, username:"usernameteste", email:email) ;
-
+                    User userResponse = _userRepository.Login(loginRequest.Email.ToLower(), MD5Utils.GenerateMD5Hash(loginRequest.Password) );
+                    if (userResponse != null)
+                    {
                         return Ok(new LoginResponseDto(
-                            username: userResponse.Username, 
-                            email: userResponse.Email, 
-                            token: TokenService.CreateToken(userResponse)) );
+                            username: userResponse.Username,
+                            email: userResponse.Email,
+                            token: TokenService.CreateToken(userResponse)));
                     }
-                    else { return BadRequest(new ErrorResponseDto(status: 500, description: "email ou senha não batem")); }
-                }else
+                    else
+                    {
+                        ErrorResponseDto errorResponse = new ErrorResponseDto(StatusCodes.Status400BadRequest, "Email ou senha inválido.");
+                        return BadRequest(errorResponse);
+                    }
+                }
+                else
                 {
-                    ErrorResponseDto errorResponse = new ErrorResponseDto(StatusCodes.Status400BadRequest, "Favor preencher corretamente os campos de email e senha.");
+                    ErrorResponseDto errorResponse = new ErrorResponseDto(StatusCodes.Status400BadRequest, "Preencha os campos de email e senha corretamente.");
                     return BadRequest(errorResponse);
                 }
 

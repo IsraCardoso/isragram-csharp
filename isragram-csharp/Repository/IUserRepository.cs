@@ -7,5 +7,7 @@ namespace isragram_csharp.Repository
         public void Save (User user);
         public bool UsernameExists (string username);
         public bool EmailExists(string email);
+        public User Login(string email, string password);
+        public User GetUserById(int id);
     }
 }
