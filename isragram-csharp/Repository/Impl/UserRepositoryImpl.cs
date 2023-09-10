@@ -35,5 +35,11 @@ namespace isragram_csharp.Repository.Impl
         {
             return _context.Users.FirstOrDefault(u => u.Id == id);
         }
+
+        public void UpdateUser(User user)
+        {
+            _context.Update(user);
+            _context.SaveChanges();
+        }
     }
 }

@@ -20,6 +20,72 @@ namespace isragram_csharp.Controllers
             _logger = logger;
         }
 
+        [HttpPut]
+        public IActionResult EditUser([FromForm] UserRequestDto userReq)
+        {
+            try
+            {
+                User activeUser = ReadToken();
+                var errorList = new List<string>();
+
+                if (userReq != null)
+                {
+
+                    if (String.IsNullOrEmpty(userReq.Username) || String.IsNullOrWhiteSpace(userReq.Username))
+                    {
+                        errorList.Add("O nome de usuário digitado é inválido");
+                    }
+                    userReq.Username = userReq.Username.ToLower();
+
+
+                    if (_userRepository.UsernameExists(userReq.Username.ToLower()))
+                    {
+                        return BadRequest(new ErrorResponseDto(
+                                                        status: StatusCodes.Status400BadRequest,
+                            description: "O nome de usuário informado já existe! Favor escolher outro nome"
+                            )
+                        );
+                    };
+                    if (errorList.Count > 0)
+                    {
+                        return BadRequest(new ErrorResponseDto(
+                            status: StatusCodes.Status400BadRequest,
+                            description: "Houve erro ao criar novo usuário",
+                            errors: errorList)
+                        );
+                    }else
+                    {
+
+                        CosmicService cosmicService = new CosmicService();
+
+                        activeUser.Avatar = cosmicService.SendImage(new ImageDto
+                        {
+                            Name = userReq.Username,
+                            Image=userReq.Avatar
+                        } );
+                        activeUser.Username = userReq.Username.ToLower();
+                        _userRepository.UpdateUser( activeUser );
+                        return Ok("Usuário atualizado com sucesso.");
+                    }
+                }
+                else
+                {
+                    return BadRequest(new ErrorResponseDto(
+                            status: StatusCodes.Status400BadRequest,
+                            description: "Houve erro ao criar novo usuário. O usuário enviado foi nulo.",
+                            errors: errorList)
+                        );
+                }
+
+            }catch (Exception ex)
+            {
+                _logger.LogError("Houve um erro ao obter ao salvar. Erro: " + ex.Message);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto(
+                    status: StatusCodes.Status500InternalServerError, description: "Houve um erro ao atualizar usuário"));
+            }
+        }
+
         [HttpGet]
         public IActionResult getUser()
         {

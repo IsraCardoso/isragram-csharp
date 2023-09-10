@@ -9,5 +9,6 @@ namespace isragram_csharp.Repository
         public bool EmailExists(string email);
         public User Login(string email, string password);
         public User GetUserById(int id);
+        public void UpdateUser(User user);
     }
 }
