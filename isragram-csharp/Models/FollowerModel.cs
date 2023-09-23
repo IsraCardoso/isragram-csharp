@@ -14,6 +14,5 @@ namespace isragram_csharp.Models
         [ForeignKey("FollowedUserId")]
         public virtual User FollowedUser { get; private set; }
 
-
     }
 }

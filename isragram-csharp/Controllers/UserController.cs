@@ -15,7 +15,7 @@ namespace isragram_csharp.Controllers
     {
         public readonly ILogger<UserController> _logger;
 
-        public UserController(ILogger<UserController> logger, IUserRepository userRepository):base(userRepository)
+        public UserController(ILogger<UserController> logger, IUserRepository userRepository) : base(userRepository)
         {
             _logger = logger;
         }
@@ -53,7 +53,8 @@ namespace isragram_csharp.Controllers
                             description: "Houve erro ao criar novo usuário",
                             errors: errorList)
                         );
-                    }else
+                    }
+                    else
                     {
 
                         CosmicService cosmicService = new CosmicService();
@@ -61,10 +62,10 @@ namespace isragram_csharp.Controllers
                         activeUser.Avatar = cosmicService.SendImage(new ImageDto
                         {
                             Name = userReq.Username,
-                            Image=userReq.Avatar
-                        } );
+                            Image = userReq.Avatar
+                        });
                         activeUser.Username = userReq.Username.ToLower();
-                        _userRepository.UpdateUser( activeUser );
+                        _userRepository.UpdateUser(activeUser);
                         return Ok("Usuário atualizado com sucesso.");
                     }
                 }
@@ -77,7 +78,8 @@ namespace isragram_csharp.Controllers
                         );
                 }
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError("Houve um erro ao obter ao salvar. Erro: " + ex.Message);
 
@@ -93,19 +95,19 @@ namespace isragram_csharp.Controllers
             {
                 User currentUser = ReadToken();
 
-                return Ok(new UserResponseDto { Email= currentUser.Email, Username= currentUser.Username});
+                return Ok(new UserResponseDto { Email = currentUser.Email, Username = currentUser.Username });
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                _logger.LogError("Houve um erro ao obter ao usuario. Erro: "+ ex.Message);
+                _logger.LogError("Houve um erro ao obter ao usuario. Erro: " + ex.Message);
                 List<string> errorsList = new List<string>
                 {
                     ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto(
-                    status: StatusCodes.Status500InternalServerError, description: "Houve um erro ao obter usuario", errors : errorsList));
+                    status: StatusCodes.Status500InternalServerError, description: "Houve um erro ao obter usuario", errors: errorsList));
             }
-            
+
         }
 
         [HttpPost]
@@ -115,11 +117,11 @@ namespace isragram_csharp.Controllers
             try
             {
                 var errorList = new List<string>();
-                    
-                if (userReq != null )
-                {               
 
-                    if ( String.IsNullOrEmpty(userReq.Username) || String.IsNullOrWhiteSpace(userReq.Username)) 
+                if (userReq != null)
+                {
+
+                    if (String.IsNullOrEmpty(userReq.Username) || String.IsNullOrWhiteSpace(userReq.Username))
                     {
                         errorList.Add("O nome de usuário digitado é inválido");
                     }
@@ -135,8 +137,8 @@ namespace isragram_csharp.Controllers
                     {
                         return BadRequest(new ErrorResponseDto(
                             status: StatusCodes.Status400BadRequest,
-                            description : "Houve erro ao criar novo usuário" ,
-                            errors : errorList)
+                            description: "Houve erro ao criar novo usuário",
+                            errors: errorList)
                         );
                     }
 
@@ -166,17 +168,18 @@ namespace isragram_csharp.Controllers
 
                     CosmicService cosmicService = new CosmicService();
 
-                    User userToSave = new User {
-                    Username = userReq.Username,
-                    Email= userReq.Email,
-                    Password= userReq.Password,
-                    Avatar = cosmicService.SendImage(new ImageDto { Image= userReq.Avatar, Name= userReq.Username.Replace(" ","") })
+                    User userToSave = new User
+                    {
+                        Username = userReq.Username,
+                        Email = userReq.Email,
+                        Password = userReq.Password,
+                        Avatar = cosmicService.SendImage(new ImageDto { Image = userReq.Avatar, Name = userReq.Username.Replace(" ", "") })
                     };
 
                     _userRepository.Save(userToSave);
                 }
 
-            return Ok("Usuário criado com sucesso!");
+                return Ok("Usuário criado com sucesso!");
 
             }
             catch (Exception ex)

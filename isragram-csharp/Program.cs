@@ -17,8 +17,9 @@ builder.Services.AddEndpointsApiExplorer();
 //config for DB entity
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<IsragramContext>(option => option.UseSqlServer(connectionString));
-// escopo para inicialização do repositório de usuários
-builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>(); //why exactly??
+// escopo para inicialização dos repositories
+builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
+builder.Services.AddScoped<IFollowerRepository, FollowerRepositoryImpl>();
 
 //config for JWT bearer token 
 var cryptographyKey = Encoding.ASCII.GetBytes(JWTKey.SecretKey);
