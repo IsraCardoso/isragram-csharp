@@ -56,7 +56,7 @@ namespace isragram_csharp.Controllers
             {
                 _logger.LogError("Ocorreu um erro ao seguir: " + e.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto(
-                    status: StatusCodes.Status500InternalServerError, description: "Houve erro ao seguir"));
+                    status: StatusCodes.Status500InternalServerError, description: "Houve erro ao seguir/desseguir"));
             }
 
         }

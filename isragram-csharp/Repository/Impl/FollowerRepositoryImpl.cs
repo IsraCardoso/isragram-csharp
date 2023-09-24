@@ -41,7 +41,7 @@ namespace isragram_csharp.Repository.Impl
 
         public Follower GetFollower(int followerUserId, int followedUserId) 
         {
-            return _context.Followers.FirstOrDefault(s => s.FollowerUserId == followerUserId && s.FollowedUserId == followedUserId);
+            return _context.Followers.FirstOrDefault(s => s.FollowerUserId == followerUserId && s.FollowedUserId == followedUserId); //why??
         }
     }
 }

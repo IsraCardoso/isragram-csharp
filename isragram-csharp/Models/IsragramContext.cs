@@ -9,7 +9,7 @@ namespace DevagramCSharp.Models
         {
         }
         public DbSet<User> Users { get; set; }
-
         public DbSet<Follower> Followers { get; set; }
+        public DbSet<Post> Posts { get; set; }
     }
 }

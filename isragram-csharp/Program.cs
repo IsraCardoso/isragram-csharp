@@ -20,6 +20,7 @@ builder.Services.AddDbContext<IsragramContext>(option => option.UseSqlServer(con
 // escopo para inicialização dos repositories
 builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
 builder.Services.AddScoped<IFollowerRepository, FollowerRepositoryImpl>();
+builder.Services.AddScoped<IPostRepository, PostRepositoryImpl>();
 
 //config for JWT bearer token 
 var cryptographyKey = Encoding.ASCII.GetBytes(JWTKey.SecretKey);
